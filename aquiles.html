@@ -254,7 +254,7 @@ button.secundario {
 
 .resultados {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
 }
 
@@ -316,6 +316,93 @@ button.secundario {
     margin-top: 8px;
 }
 
+/* Datos del encuentro en el panel de la paradoja */
+.dato {
+    background: #f5e9ff;
+    border-radius: 10px;
+    padding: 9px;
+    margin: 9px 0;
+    text-align: center;
+}
+
+.dato-etiqueta {
+    font-size: 11px;
+    line-height: 1.35;
+    color: #695279;
+}
+
+.dato-valor {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--morado-oscuro);
+    margin-top: 3px;
+    overflow-wrap: anywhere;
+}
+
+/* Gráficas */
+.graficas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.graficas svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.grafica-intro {
+    grid-column: 1 / -1;
+}
+
+.explica {
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0 0 8px;
+}
+
+.calculo {
+    font-size: 12px;
+    line-height: 1.6;
+    background: #f5e9ff;
+    border-left: 4px solid var(--morado);
+    border-radius: 0 10px 10px 0;
+    padding: 8px 10px;
+    margin-top: 8px;
+}
+
+.calculo strong {
+    color: var(--morado-oscuro);
+}
+
+.chips-velocidad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.chip {
+    background: #f5e9ff;
+    border-radius: 10px;
+    padding: 7px 4px;
+    text-align: center;
+}
+
+.chip-etiqueta {
+    font-size: 11px;
+    color: #695279;
+}
+
+.chip-valor {
+    font-size: 15px;
+    font-weight: bold;
+    color: var(--morado-oscuro);
+    margin-top: 2px;
+}
+
 @media (max-width: 900px) {
     .panel-principal {
         grid-template-columns: 1fr 1fr;
@@ -324,6 +411,14 @@ button.secundario {
     .centro {
         grid-column: 1 / -1;
         grid-row: 1;
+    }
+
+    .resultados {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .graficas {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -349,6 +444,10 @@ button.secundario {
     }
 
     .resultados {
+        grid-template-columns: 1fr;
+    }
+
+    .chips-velocidad {
         grid-template-columns: 1fr;
     }
 
@@ -528,8 +627,12 @@ button.secundario {
                 <div class="numero" id="distanciaResultado">20.00 m</div>
             </div>
             <div class="tarjeta">
-                <div class="etiqueta">Puntos alcanzados</div>
-                <div class="numero" id="puntosResultado">0</div>
+                <div class="etiqueta">Metros recorridos por Aquiles</div>
+                <div class="numero" id="metrosAquiles">0.00 m</div>
+            </div>
+            <div class="tarjeta">
+                <div class="etiqueta">Metros recorridos por la tortuga</div>
+                <div class="numero" id="metrosTortuga">0.00 m</div>
             </div>
         </section>
 
@@ -556,15 +659,6 @@ button.secundario {
             El razonamiento puede repetirse una y otra vez.
         </p>
 
-        <div class="formula">
-            t = d / (v<sub>A</sub> − v<sub>T</sub>)
-        </div>
-
-        <p>
-            En la situación de esta carrera, si Aquiles corre más rápido, la distancia entre ambos
-            disminuye hasta que se encuentran.
-        </p>
-
         <p><strong>¿Dónde está la paradoja?</strong></p>
 
         <p>
@@ -573,16 +667,165 @@ button.secundario {
             por qué Aquiles sí alcanza a la tortuga.
         </p>
 
-        <div class="formula" id="tiempoEncuentro">
-            Tiempo de encuentro: 2.50 s
+        <!-- Datos del encuentro: se recalculan al mover los controles -->
+        <div class="dato">
+            <div class="dato-etiqueta">Tiempo de encuentro</div>
+            <div class="dato-valor" id="tiempoEncuentro">2.50 s</div>
         </div>
 
-        <div class="leyenda">
-            Puedes cambiar las velocidades y la ventaja inicial para comprobar cómo cambia el resultado.
+        <div class="dato">
+            <div class="dato-etiqueta">Distancia que recorre Aquiles para alcanzar a la tortuga</div>
+            <div class="dato-valor" id="distanciaAquilesEncuentro">25.00 m</div>
+        </div>
+
+        <div class="dato">
+            <div class="dato-etiqueta">Distancia que recorre la tortuga hasta ser alcanzada</div>
+            <div class="dato-valor" id="distanciaTortugaEncuentro">5.00 m</div>
         </div>
     </aside>
 
 </div>
+
+<!-- ==========================================================
+     GRÁFICAS (se dibujan con JavaScript dentro de cada <svg>)
+     ========================================================== -->
+<section class="graficas">
+
+    <!-- Introducción a las gráficas -->
+    <div class="panel grafica-intro">
+        <h2>📊 Las gráficas que explican la paradoja</h2>
+        <p class="explica">
+            Van en orden: primero la carrera, luego las infinitas etapas de Zenón y, al final,
+            cómo el cálculo (derivadas, series, límites e integrales) muestra que el tiempo
+            total es finito. Todas cambian cuando mueves los controles.
+        </p>
+    </div>
+
+    <!-- 1 · Posición vs. tiempo -->
+    <div class="panel">
+        <h2>1 · Tiempo vs. posición</h2>
+        <p class="explica">
+            La carrera tal como ocurre: una recta por corredor. Donde se cruzan (punto rosado),
+            Aquiles alcanza a la tortuga.
+        </p>
+        <svg id="grafPosicion" viewBox="0 0 440 270" role="img"
+             aria-label="Posición de Aquiles y de la tortuga en función del tiempo"></svg>
+        <div class="calculo">
+            <strong>📐 Con cálculo:</strong>
+            x<sub>A</sub>(t) = v<sub>A</sub>·t y x<sub>T</sub>(t) = d + v<sub>T</sub>·t.
+            La derivada de cada recta es su velocidad: x′(t) = v.
+            Igualando las dos posiciones se obtiene t* = d / (v<sub>A</sub> − v<sub>T</sub>).
+        </div>
+    </div>
+
+    <!-- 2 · La escalera de Zenón -->
+    <div class="panel">
+        <h2>2 · Las infinitas etapas</h2>
+        <p class="explica">
+            La escalera de Zenón sobre las mismas rectas. Cada tramo horizontal es una etapa
+            (Aquiles llega donde estaba la tortuga) y cada tramo vertical es lo que ella avanzó
+            mientras tanto. Son infinitas, pero todas ocurren antes del encuentro y se amontonan
+            contra el punto rosado.
+        </p>
+        <svg id="grafEtapas" viewBox="0 0 440 270" role="img"
+             aria-label="Escalera de etapas entre las rectas de posición de Aquiles y de la tortuga"></svg>
+        <div class="calculo">
+            <strong>📐 Con cálculo:</strong>
+            la etapa n termina en t<sub>n</sub> = (d/v<sub>A</sub>)(1 + r + … + r<sup>n−1</sup>),
+            con r = v<sub>T</sub>/v<sub>A</sub>. Si r &lt; 1, la sucesión t<sub>n</sub> crece pero
+            está acotada por t*, así que converge: lim<sub>n→∞</sub> t<sub>n</sub> = t*.
+        </div>
+    </div>
+
+    <!-- 3 · Serie geométrica -->
+    <div class="panel">
+        <h2>3 · Cada etapa dura menos</h2>
+        <p class="explica">
+            Las barras son la duración de cada etapa: cada una es r veces la anterior, así que se
+            achican muy rápido. La línea es el tiempo acumulado, que se pega a un límite
+            (línea rosada).
+        </p>
+        <svg id="grafSerie" viewBox="0 0 440 270" role="img"
+             aria-label="Duración de cada etapa y tiempo acumulado, que converge a un límite"></svg>
+        <div class="calculo">
+            <strong>📐 Con cálculo:</strong>
+            serie geométrica Σ<sub>n=1</sub><sup>∞</sup> (d/v<sub>A</sub>)·r<sup>n−1</sup> =
+            (d/v<sub>A</sub>) / (1 − r) = d / (v<sub>A</sub> − v<sub>T</sub>) = t*, válida si |r| &lt; 1.
+            Si v<sub>A</sub> ≤ v<sub>T</sub>, entonces r ≥ 1 y la serie diverge: ahí sí no hay encuentro.
+        </div>
+    </div>
+
+    <!-- 4 · Distancia entre ambos -->
+    <div class="panel">
+        <h2>4 · La distancia entre ambos</h2>
+        <p class="explica">
+            La brecha baja en línea recta hasta cero. Los puntos rosados son la brecha al final de
+            cada etapa: siempre queda algo, pero ese algo se hace cada vez más pequeño.
+        </p>
+        <svg id="grafBrecha" viewBox="0 0 440 270" role="img"
+             aria-label="Distancia entre Aquiles y la tortuga en función del tiempo"></svg>
+        <div class="calculo">
+            <strong>📐 Con cálculo:</strong>
+            D(t) = d − (v<sub>A</sub> − v<sub>T</sub>)·t, y su derivada es constante:
+            D′(t) = −(v<sub>A</sub> − v<sub>T</sub>). Al final de la etapa n quedan d·r<sup>n</sup> metros
+            y lim<sub>n→∞</sub> d·r<sup>n</sup> = 0. Por eso D(t*) = 0.
+        </div>
+    </div>
+
+    <!-- 5 · Velocidad vs. tiempo (integral) -->
+    <div class="panel">
+        <h2>5 · Velocidad vs. tiempo</h2>
+        <p class="explica">
+            Las velocidades son constantes, así que son rectas horizontales. El área bajo cada
+            recta es la distancia recorrida: la verde es lo que avanza la tortuga y la morada es
+            lo que Aquiles le va recuperando.
+        </p>
+        <svg id="grafVelTiempo" viewBox="0 0 440 270" role="img"
+             aria-label="Velocidad de Aquiles y de la tortuga en función del tiempo, con las áreas sombreadas"></svg>
+        <div class="calculo">
+            <strong>📐 Con cálculo:</strong>
+            distancia = ∫<sub>0</sub><sup>t*</sup> v dt. Aquiles alcanza a la tortuga cuando
+            ∫v<sub>A</sub>dt = d + ∫v<sub>T</sub>dt, es decir, cuando el área entre las rectas,
+            (v<sub>A</sub> − v<sub>T</sub>)·t*, vale exactamente d.
+        </div>
+    </div>
+
+    <!-- 6 · Efecto de las velocidades -->
+    <div class="panel">
+        <h2>6 · ¿Cómo afectan las velocidades?</h2>
+        <p class="explica">
+            El tiempo de encuentro según la velocidad de Aquiles, con la tortuga y la ventaja
+            fijas. Mientras más rápido corre, menos tarda; cerca de la velocidad de la tortuga,
+            el tiempo se dispara.
+        </p>
+
+        <div class="chips-velocidad">
+            <div class="chip">
+                <div class="chip-etiqueta">Aquiles</div>
+                <div class="chip-valor" id="chipAquiles">10 m/s</div>
+            </div>
+            <div class="chip">
+                <div class="chip-etiqueta">Tortuga</div>
+                <div class="chip-valor" id="chipTortuga">2 m/s</div>
+            </div>
+            <div class="chip">
+                <div class="chip-etiqueta">Con la que se acerca</div>
+                <div class="chip-valor" id="chipAcercamiento">8 m/s</div>
+            </div>
+        </div>
+
+        <svg id="grafVelocidades" viewBox="0 0 440 270" role="img"
+             aria-label="Tiempo de encuentro según la velocidad de Aquiles"></svg>
+        <div class="calculo">
+            <strong>📐 Con cálculo:</strong>
+            t*(v<sub>A</sub>) = d / (v<sub>A</sub> − v<sub>T</sub>). Límites: si v<sub>A</sub> → v<sub>T</sub><sup>+</sup>,
+            entonces t* → ∞ (casi la misma rapidez: no se alcanzan nunca); si v<sub>A</sub> → ∞,
+            entonces t* → 0.
+        </div>
+    </div>
+
+</section>
+
 </div>
 
 <script>
@@ -601,16 +844,29 @@ const estadoCarrera = document.getElementById("estadoCarrera");
 const reloj = document.getElementById("reloj");
 const tiempoResultado = document.getElementById("tiempoResultado");
 const distanciaResultado = document.getElementById("distanciaResultado");
-const puntosResultado = document.getElementById("puntosResultado");
+const metrosAquiles = document.getElementById("metrosAquiles");
+const metrosTortuga = document.getElementById("metrosTortuga");
 const mensaje = document.getElementById("mensaje");
 const tiempoEncuentro = document.getElementById("tiempoEncuentro");
+const distanciaAquilesEncuentro = document.getElementById("distanciaAquilesEncuentro");
+const distanciaTortugaEncuentro = document.getElementById("distanciaTortugaEncuentro");
+
+const chipAquiles = document.getElementById("chipAquiles");
+const chipTortuga = document.getElementById("chipTortuga");
+const chipAcercamiento = document.getElementById("chipAcercamiento");
+
+const grafPosicion = document.getElementById("grafPosicion");
+const grafEtapas = document.getElementById("grafEtapas");
+const grafSerie = document.getElementById("grafSerie");
+const grafBrecha = document.getElementById("grafBrecha");
+const grafVelTiempo = document.getElementById("grafVelTiempo");
+const grafVelocidades = document.getElementById("grafVelocidades");
 
 let tiempo = 0;
 let animando = false;
 let ultimoFotograma = 0;
 let identificadorAnimacion = null;
 let desplazamiento = 0;
-let puntos = 0;
 let encuentroMostrado = false;
 
 function numero(control) {
@@ -638,13 +894,23 @@ function actualizarTiempoEncuentro() {
     const vT = numero(controlTortuga);
     const ventaja = numero(controlVentaja);
 
+    // Velocidades que se muestran sobre la gráfica de velocidades
+    chipAquiles.textContent = formatear(vA) + " m/s";
+    chipTortuga.textContent = formatear(vT) + " m/s";
+    chipAcercamiento.textContent =
+        vA > vT ? formatear(vA - vT) + " m/s" : "No se acerca";
+
     if (vA > vT) {
         const tEncuentro = ventaja / (vA - vT);
-        tiempoEncuentro.textContent =
-            "Tiempo de encuentro: " + tEncuentro.toFixed(2) + " s";
+
+        // Tiempo, y metros que recorre cada uno hasta el momento del encuentro
+        tiempoEncuentro.textContent = tEncuentro.toFixed(2) + " s";
+        distanciaAquilesEncuentro.textContent = (vA * tEncuentro).toFixed(2) + " m";
+        distanciaTortugaEncuentro.textContent = (vT * tEncuentro).toFixed(2) + " m";
     } else {
-        tiempoEncuentro.textContent =
-            "Con estas velocidades, Aquiles no alcanza a la tortuga.";
+        tiempoEncuentro.textContent = "No se encuentran";
+        distanciaAquilesEncuentro.textContent = "—";
+        distanciaTortugaEncuentro.textContent = "—";
     }
 }
 
@@ -741,7 +1007,484 @@ function dibujarCarrera() {
 
     tiempoResultado.textContent = tiempo.toFixed(2) + " s";
     reloj.textContent = "Tiempo: " + tiempo.toFixed(2) + " s";
-    puntosResultado.textContent = puntos;
+    // Metros que ha recorrido cada uno desde que empezó la carrera
+    // (en la tortuga no se cuenta la ventaja inicial).
+    metrosAquiles.textContent = (vA * tiempo).toFixed(2) + " m";
+    metrosTortuga.textContent = (vT * tiempo).toFixed(2) + " m";
+
+    // Las gráficas se actualizan junto con la carrera
+    dibujarGraficas();
+}
+
+/* ==========================================================
+   GRÁFICAS (SVG dibujado con JavaScript)
+   ========================================================== */
+
+const COLOR_AQUILES = "#7951a8";
+const COLOR_TORTUGA = "#3f9a5a";
+const COLOR_PUNTO = "#ec4f9a";
+
+// Tamaño del lienzo y márgenes (dejan sitio a los números y títulos de los ejes)
+const ANCHO_GRAF = 440;
+const ALTO_GRAF = 270;
+const MARGEN = { izq: 52, der: 16, arr: 16, abj: 44 };
+const ANCHO_AREA = ANCHO_GRAF - MARGEN.izq - MARGEN.der;
+const ALTO_AREA = ALTO_GRAF - MARGEN.arr - MARGEN.abj;
+
+// Muestra un número sin ceros de más: 25 → "25", 2.5 → "2.5", 2.456 → "2.46"
+function formatear(valor) {
+    return String(Number(valor.toFixed(2)));
+}
+
+// Elige un paso "redondo" (1, 2, 5, 10...) para marcar los ejes
+function pasoBonito(maximo, objetivo) {
+    const bruto = maximo / objetivo;
+    const potencia = Math.pow(10, Math.floor(Math.log10(bruto)));
+    const f = bruto / potencia;
+    const base = f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10;
+    return base * potencia;
+}
+
+// Dibuja la cuadrícula, los números y los títulos de los ejes
+function ejesSVG(xMax, yMax, tituloX, tituloY, pasoXFijo) {
+    const px = v => MARGEN.izq + v / xMax * ANCHO_AREA;
+    const py = v => MARGEN.arr + ALTO_AREA - v / yMax * ALTO_AREA;
+    const base = MARGEN.arr + ALTO_AREA;
+    let s = "";
+
+    const pasoX = pasoXFijo || pasoBonito(xMax, 5);
+    const pasoY = pasoBonito(yMax, 5);
+
+    for (let i = 0; i * pasoX <= xMax + 1e-9; i++) {
+        const v = i * pasoX;
+        s += `<line x1="${px(v)}" y1="${MARGEN.arr}" x2="${px(v)}" y2="${base}" stroke="#eadcf5" stroke-width="1"/>`;
+        s += `<text x="${px(v)}" y="${base + 15}" text-anchor="middle" font-size="11" fill="#695279">${formatear(v)}</text>`;
+    }
+
+    for (let i = 0; i * pasoY <= yMax + 1e-9; i++) {
+        const v = i * pasoY;
+        s += `<line x1="${MARGEN.izq}" y1="${py(v)}" x2="${MARGEN.izq + ANCHO_AREA}" y2="${py(v)}" stroke="#eadcf5" stroke-width="1"/>`;
+        s += `<text x="${MARGEN.izq - 6}" y="${py(v) + 4}" text-anchor="end" font-size="11" fill="#695279">${formatear(v)}</text>`;
+    }
+
+    // Ejes principales
+    s += `<line x1="${MARGEN.izq}" y1="${base}" x2="${MARGEN.izq + ANCHO_AREA}" y2="${base}" stroke="#8e78a7" stroke-width="2"/>`;
+    s += `<line x1="${MARGEN.izq}" y1="${MARGEN.arr}" x2="${MARGEN.izq}" y2="${base}" stroke="#8e78a7" stroke-width="2"/>`;
+
+    // Títulos de los ejes
+    s += `<text x="${MARGEN.izq + ANCHO_AREA / 2}" y="${ALTO_GRAF - 6}" text-anchor="middle" font-size="12" font-weight="bold" fill="#4a326b">${tituloX}</text>`;
+    s += `<text transform="rotate(-90)" x="${-(MARGEN.arr + ALTO_AREA / 2)}" y="14" text-anchor="middle" font-size="12" font-weight="bold" fill="#4a326b">${tituloY}</text>`;
+
+    return s;
+}
+
+// Gráfica 1: tiempo (eje x) vs. posición (eje y) de Aquiles y de la tortuga.
+// Donde se cruzan las dos rectas está el intercepto (el encuentro).
+function dibujarGraficaPosicion() {
+    const vA = numero(controlAquiles);
+    const vT = numero(controlTortuga);
+    const ventaja = numero(controlVentaja);
+
+    const hayEncuentro = vA > vT;
+    const tEnc = hayEncuentro ? ventaja / (vA - vT) : Infinity;
+
+    // Rango del tiempo: un poco más allá del encuentro (o 10 s si nunca se encuentran)
+    const tMax = hayEncuentro ? tEnc * 1.5 : 10;
+    const yMax = Math.max(vA * tMax, ventaja + vT * tMax);
+
+    const px = t => MARGEN.izq + t / tMax * ANCHO_AREA;
+    const py = p => MARGEN.arr + ALTO_AREA - p / yMax * ALTO_AREA;
+
+    let s = ejesSVG(tMax, yMax, "Tiempo (s)", "Posición (m)");
+
+    // Recta de Aquiles: x = vA·t (sale del metro 0)
+    s += `<line x1="${px(0)}" y1="${py(0)}" x2="${px(tMax)}" y2="${py(vA * tMax)}" stroke="${COLOR_AQUILES}" stroke-width="3" stroke-linecap="round"/>`;
+
+    // Recta de la tortuga: x = ventaja + vT·t (sale del metro de la ventaja)
+    s += `<line x1="${px(0)}" y1="${py(ventaja)}" x2="${px(tMax)}" y2="${py(ventaja + vT * tMax)}" stroke="${COLOR_TORTUGA}" stroke-width="3" stroke-linecap="round"/>`;
+
+    // Línea vertical que marca el momento actual de la carrera
+    if (tiempo > 0) {
+        const tc = Math.min(tiempo, tMax);
+        s += `<line x1="${px(tc)}" y1="${MARGEN.arr}" x2="${px(tc)}" y2="${MARGEN.arr + ALTO_AREA}" stroke="#9b84b0" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+        s += `<circle cx="${px(tc)}" cy="${py(vA * tc)}" r="5" fill="${COLOR_AQUILES}" stroke="white" stroke-width="2"/>`;
+        s += `<circle cx="${px(tc)}" cy="${py(ventaja + vT * tc)}" r="5" fill="${COLOR_TORTUGA}" stroke="white" stroke-width="2"/>`;
+    }
+
+    // Intercepto: punto donde ambos están en la misma posición
+    if (hayEncuentro) {
+        const xEnc = vA * tEnc;
+        const baseY = MARGEN.arr + ALTO_AREA;
+
+        s += `<line x1="${px(tEnc)}" y1="${py(xEnc)}" x2="${px(tEnc)}" y2="${baseY}" stroke="${COLOR_PUNTO}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+        s += `<line x1="${MARGEN.izq}" y1="${py(xEnc)}" x2="${px(tEnc)}" y2="${py(xEnc)}" stroke="${COLOR_PUNTO}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+        s += `<circle cx="${px(tEnc)}" cy="${py(xEnc)}" r="7" fill="${COLOR_PUNTO}" stroke="white" stroke-width="2.5"/>`;
+        s += `<text x="${px(tEnc) + 11}" y="${py(xEnc) + 22}" font-size="12" font-weight="bold" fill="#b02a6b" stroke="white" stroke-width="3" paint-order="stroke">(${formatear(tEnc)} s, ${formatear(xEnc)} m)</text>`;
+    } else {
+        // Texto abajo a la derecha, donde no tapa ninguna de las dos rectas
+        s += `<text x="${MARGEN.izq + ANCHO_AREA - 8}" y="${MARGEN.arr + ALTO_AREA - 14}" text-anchor="end" font-size="12" font-weight="bold" fill="#b02a6b" stroke="white" stroke-width="3" paint-order="stroke">Las rectas nunca se cruzan</text>`;
+    }
+
+    // Leyenda (esquina superior izquierda)
+    const lx = MARGEN.izq + 10, ly = MARGEN.arr + 8;
+    s += `<rect x="${lx - 6}" y="${ly - 6}" width="96" height="58" rx="8" fill="white" fill-opacity="0.9" stroke="#e7c4ed"/>`;
+    s += `<line x1="${lx}" y1="${ly + 8}" x2="${lx + 18}" y2="${ly + 8}" stroke="${COLOR_AQUILES}" stroke-width="3" stroke-linecap="round"/>`;
+    s += `<text x="${lx + 24}" y="${ly + 12}" font-size="11" fill="#39264d">Aquiles</text>`;
+    s += `<line x1="${lx}" y1="${ly + 26}" x2="${lx + 18}" y2="${ly + 26}" stroke="${COLOR_TORTUGA}" stroke-width="3" stroke-linecap="round"/>`;
+    s += `<text x="${lx + 24}" y="${ly + 30}" font-size="11" fill="#39264d">Tortuga</text>`;
+    s += `<circle cx="${lx + 9}" cy="${ly + 44}" r="5" fill="${COLOR_PUNTO}"/>`;
+    s += `<text x="${lx + 24}" y="${ly + 48}" font-size="11" fill="#39264d">Encuentro</text>`;
+
+    grafPosicion.innerHTML = s;
+}
+
+// Gráfica 2: cómo cambia el tiempo de encuentro según la velocidad de Aquiles.
+// La curva es t = ventaja / (vA − vT). Se dispara cuando vA se acerca a vT.
+function dibujarGraficaVelocidades() {
+    const vA = numero(controlAquiles);
+    const vT = numero(controlTortuga);
+    const ventaja = numero(controlVentaja);
+
+    const hayEncuentro = vA > vT;
+    const tEnc = hayEncuentro ? ventaja / (vA - vT) : Infinity;
+
+    // El eje x llega hasta la velocidad máxima del control de Aquiles
+    const xMax = Number(controlAquiles.max);
+    const yMax = hayEncuentro ? Math.max(tEnc * 1.6, ventaja / 2) : ventaja / 2;
+
+    const px = v => MARGEN.izq + v / xMax * ANCHO_AREA;
+    const py = t => MARGEN.arr + ALTO_AREA - t / yMax * ALTO_AREA;
+    const baseY = MARGEN.arr + ALTO_AREA;
+
+    let s = ejesSVG(xMax, yMax, "Velocidad de Aquiles (m/s)", "Tiempo de encuentro (s)");
+
+    // Línea vertical: velocidad de la tortuga (Aquiles debe superarla para alcanzarla)
+    s += `<line x1="${px(vT)}" y1="${MARGEN.arr}" x2="${px(vT)}" y2="${baseY}" stroke="${COLOR_TORTUGA}" stroke-width="2" stroke-dasharray="6 4"/>`;
+    s += `<text x="${px(vT) + 6}" y="${baseY - 8}" font-size="11" font-weight="bold" fill="${COLOR_TORTUGA}" stroke="white" stroke-width="3" paint-order="stroke">velocidad de la tortuga</text>`;
+
+    // Curva: desde la velocidad donde t = yMax hasta la velocidad máxima
+    const v0 = vT + ventaja / yMax;
+    let puntos = "";
+    for (let i = 0; i <= 80; i++) {
+        const v = v0 + (xMax - v0) * i / 80;
+        const t = ventaja / (v - vT);
+        puntos += `${px(v)},${py(t)} `;
+    }
+    s += `<polyline points="${puntos}" fill="none" stroke="${COLOR_AQUILES}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+    if (hayEncuentro) {
+        // Punto con los valores actuales de los controles
+        s += `<line x1="${px(vA)}" y1="${py(tEnc)}" x2="${px(vA)}" y2="${baseY}" stroke="${COLOR_PUNTO}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+        s += `<line x1="${MARGEN.izq}" y1="${py(tEnc)}" x2="${px(vA)}" y2="${py(tEnc)}" stroke="${COLOR_PUNTO}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+        s += `<circle cx="${px(vA)}" cy="${py(tEnc)}" r="7" fill="${COLOR_PUNTO}" stroke="white" stroke-width="2.5"/>`;
+
+        // La etiqueta va en el lado donde la curva no la tapa: si el punto está a la
+        // derecha, debajo y a la izquierda; si está a la izquierda, arriba y a la derecha
+        const aLaDerecha = px(vA) > ANCHO_GRAF * 0.55;
+        const etiquetaX = aLaDerecha ? px(vA) - 11 : px(vA) + 11;
+        let etiquetaY = aLaDerecha ? py(tEnc) + 22 : py(tEnc) - 12;
+        if (etiquetaY > baseY - 6) etiquetaY = py(tEnc) - 12; // no se sale de la gráfica
+        etiquetaY = Math.max(MARGEN.arr + 12, etiquetaY);
+        s += `<text x="${etiquetaX}" y="${etiquetaY}" text-anchor="${aLaDerecha ? "end" : "start"}" font-size="12" font-weight="bold" fill="#b02a6b" stroke="white" stroke-width="3" paint-order="stroke">(${formatear(vA)} m/s, ${formatear(tEnc)} s)</text>`;
+    } else {
+        // Aquiles no supera a la tortuga: no hay encuentro
+        s += `<line x1="${px(vA)}" y1="${MARGEN.arr}" x2="${px(vA)}" y2="${baseY}" stroke="${COLOR_PUNTO}" stroke-width="2" stroke-dasharray="5 4"/>`;
+        s += `<text x="${MARGEN.izq + ANCHO_AREA - 8}" y="${baseY - 30}" text-anchor="end" font-size="12" font-weight="bold" fill="#b02a6b" stroke="white" stroke-width="3" paint-order="stroke">Aquiles no supera a la tortuga:</text>`;
+        s += `<text x="${MARGEN.izq + ANCHO_AREA - 8}" y="${baseY - 14}" text-anchor="end" font-size="12" font-weight="bold" fill="#b02a6b" stroke="white" stroke-width="3" paint-order="stroke">no hay encuentro</text>`;
+    }
+
+    grafVelocidades.innerHTML = s;
+}
+
+// Dibuja un cuadro de leyenda. Cada entrada: { tipo: "linea" | "punto" | "barra", color, texto }
+function leyendaSVG(x, y, entradas) {
+    const ancho = 172;
+    const alto = entradas.length * 18 + 10;
+    let s = `<rect x="${x}" y="${y}" width="${ancho}" height="${alto}" rx="8" fill="white" fill-opacity="0.92" stroke="#e7c4ed"/>`;
+
+    entradas.forEach((e, i) => {
+        const cy = y + 17 + i * 18;
+        if (e.tipo === "linea") {
+            s += `<line x1="${x + 10}" y1="${cy - 4}" x2="${x + 30}" y2="${cy - 4}" stroke="${e.color}" stroke-width="3" stroke-linecap="round"/>`;
+        } else if (e.tipo === "punto") {
+            s += `<circle cx="${x + 20}" cy="${cy - 4}" r="5" fill="${e.color}"/>`;
+        } else {
+            s += `<rect x="${x + 12}" y="${cy - 10}" width="16" height="12" fill="${e.color}" stroke="#7951a8"/>`;
+        }
+        s += `<text x="${x + 38}" y="${cy}" font-size="11" fill="#39264d">${e.texto}</text>`;
+    });
+
+    return s;
+}
+
+// Etapas de la paradoja: Aquiles llega a donde estaba la tortuga, y esto se repite.
+// r = vT / vA es la razón entre la duración de una etapa y la siguiente.
+// S[n] = tiempo acumulado al terminar la etapa n (S[0] = 0).
+function calcularEtapas(vA, vT, ventaja, N) {
+    const r = vT / vA;
+    const t1 = ventaja / vA;   // duración de la primera etapa
+    const S = [0];
+    for (let n = 1; n <= N; n++) {
+        S[n] = S[n - 1] + t1 * Math.pow(r, n - 1);
+    }
+    return { r, t1, S };
+}
+
+// Gráfica 2: la "escalera" de Zenón sobre las rectas de posición.
+// Tramo horizontal = una etapa; tramo vertical = lo que la tortuga ya avanzó.
+function dibujarGraficaEtapas() {
+    const vA = numero(controlAquiles);
+    const vT = numero(controlTortuga);
+    const ventaja = numero(controlVentaja);
+
+    const hayEncuentro = vA > vT;
+    const tEnc = hayEncuentro ? ventaja / (vA - vT) : Infinity;
+    const tMax = hayEncuentro ? tEnc * 1.5 : 10;
+    const yMax = Math.max(vA * tMax, ventaja + vT * tMax);
+
+    const px = t => MARGEN.izq + t / tMax * ANCHO_AREA;
+    const py = p => MARGEN.arr + ALTO_AREA - p / yMax * ALTO_AREA;
+    const baseY = MARGEN.arr + ALTO_AREA;
+
+    let s = ejesSVG(tMax, yMax, "Tiempo (s)", "Posición (m)");
+
+    // Las dos rectas, más suaves para que resalte la escalera
+    s += `<line x1="${px(0)}" y1="${py(0)}" x2="${px(tMax)}" y2="${py(vA * tMax)}" stroke="${COLOR_AQUILES}" stroke-width="2.5" stroke-opacity="0.5" stroke-linecap="round"/>`;
+    s += `<line x1="${px(0)}" y1="${py(ventaja)}" x2="${px(tMax)}" y2="${py(ventaja + vT * tMax)}" stroke="${COLOR_TORTUGA}" stroke-width="2.5" stroke-opacity="0.6" stroke-linecap="round"/>`;
+
+    if (hayEncuentro) {
+        const N = 10;
+        const { S } = calcularEtapas(vA, vT, ventaja, N);
+
+        // Escalera: sube hasta donde está la tortuga y avanza hasta donde llega Aquiles
+        let puntos = `${px(0)},${py(0)} `;
+        for (let n = 0; n < N; n++) {
+            const q = ventaja + vT * S[n];   // posición de la tortuga cuando empieza la etapa n+1
+            puntos += `${px(S[n])},${py(q)} ${px(S[n + 1])},${py(q)} `;
+        }
+        s += `<polyline points="${puntos}" fill="none" stroke="#4a326b" stroke-width="2" stroke-linejoin="round"/>`;
+
+        // Punto donde termina cada etapa (sobre la recta de Aquiles)
+        for (let n = 1; n <= N; n++) {
+            s += `<circle cx="${px(S[n])}" cy="${py(vA * S[n])}" r="3.5" fill="#4a326b" stroke="white" stroke-width="1"/>`;
+        }
+        for (let n = 1; n <= 2; n++) {
+            s += `<text x="${px(S[n])}" y="${py(vA * S[n]) + 17}" text-anchor="middle" font-size="10" font-weight="bold" fill="#4a326b" stroke="white" stroke-width="3" paint-order="stroke">${n}</text>`;
+        }
+
+        // Encuentro: hacia ahí se amontonan todas las etapas
+        const xEnc = vA * tEnc;
+        s += `<circle cx="${px(tEnc)}" cy="${py(xEnc)}" r="7" fill="${COLOR_PUNTO}" stroke="white" stroke-width="2.5"/>`;
+        s += `<text x="${px(tEnc) + 11}" y="${py(xEnc) + 22}" font-size="12" font-weight="bold" fill="#b02a6b" stroke="white" stroke-width="3" paint-order="stroke">(${formatear(tEnc)} s, ${formatear(xEnc)} m)</text>`;
+    } else {
+        s += `<text x="${MARGEN.izq + ANCHO_AREA - 8}" y="${baseY - 14}" text-anchor="end" font-size="12" font-weight="bold" fill="#b02a6b" stroke="white" stroke-width="3" paint-order="stroke">Sin encuentro: no hay escalera que cierre</text>`;
+    }
+
+    s += leyendaSVG(MARGEN.izq + 10, MARGEN.arr + 8, [
+        { tipo: "linea", color: COLOR_AQUILES, texto: "Aquiles" },
+        { tipo: "linea", color: COLOR_TORTUGA, texto: "Tortuga" },
+        { tipo: "linea", color: "#4a326b", texto: "Etapas 1, 2, 3, …" }
+    ]);
+
+    grafEtapas.innerHTML = s;
+}
+
+// Gráfica 3: duración de cada etapa (barras) y tiempo acumulado (línea).
+// La serie geométrica converge a t* cuando r < 1.
+function dibujarGraficaSerie() {
+    const vA = numero(controlAquiles);
+    const vT = numero(controlTortuga);
+    const ventaja = numero(controlVentaja);
+
+    const hayEncuentro = vA > vT;
+    const tEnc = hayEncuentro ? ventaja / (vA - vT) : Infinity;
+
+    const N = hayEncuentro ? 8 : 6;
+    const { S, t1, r } = calcularEtapas(vA, vT, ventaja, N);
+
+    const xMax = N + 0.5;
+    const yMax = hayEncuentro ? tEnc * 1.5 : S[N] * 1.1;
+
+    const px = n => MARGEN.izq + n / xMax * ANCHO_AREA;
+    const py = t => MARGEN.arr + ALTO_AREA - t / yMax * ALTO_AREA;
+    const baseY = MARGEN.arr + ALTO_AREA;
+
+    let s = ejesSVG(xMax, yMax, "Número de etapa (n)", "Tiempo (s)", 1);
+
+    // Barras: duración de cada etapa, t1 · r^(n−1)
+    const anchoBarra = ANCHO_AREA / xMax * 0.55;
+    for (let n = 1; n <= N; n++) {
+        const tau = t1 * Math.pow(r, n - 1);
+        s += `<rect x="${px(n) - anchoBarra / 2}" y="${py(tau)}" width="${anchoBarra}" height="${baseY - py(tau)}" fill="#cdb4e8" stroke="#7951a8" stroke-width="1"/>`;
+        // Valor de las primeras barras (la primera va dentro para no chocar con la línea)
+        if (hayEncuentro && n <= 3) {
+            const yTexto = n === 1 ? py(tau) + 15 : py(tau) - 5;
+            s += `<text x="${px(n)}" y="${yTexto}" text-anchor="middle" font-size="10" fill="#4a326b" stroke="${n === 1 ? "none" : "white"}" stroke-width="3" paint-order="stroke">${formatear(tau)} s</text>`;
+        }
+    }
+
+    // Límite al que se acerca el tiempo acumulado
+    if (hayEncuentro) {
+        s += `<line x1="${MARGEN.izq}" y1="${py(tEnc)}" x2="${MARGEN.izq + ANCHO_AREA}" y2="${py(tEnc)}" stroke="${COLOR_PUNTO}" stroke-width="2" stroke-dasharray="6 4"/>`;
+        s += `<text x="${MARGEN.izq + ANCHO_AREA - 6}" y="${py(tEnc) - 6}" text-anchor="end" font-size="12" font-weight="bold" fill="#b02a6b" stroke="white" stroke-width="3" paint-order="stroke">límite: t* = ${formatear(tEnc)} s</text>`;
+    }
+
+    // Línea: tiempo acumulado S_n
+    let puntos = "";
+    for (let n = 1; n <= N; n++) {
+        puntos += `${px(n)},${py(S[n])} `;
+    }
+    s += `<polyline points="${puntos}" fill="none" stroke="#4a326b" stroke-width="2.5" stroke-linejoin="round"/>`;
+    for (let n = 1; n <= N; n++) {
+        s += `<circle cx="${px(n)}" cy="${py(S[n])}" r="4" fill="#4a326b" stroke="white" stroke-width="1.5"/>`;
+    }
+
+    const entradas = [
+        { tipo: "barra", color: "#cdb4e8", texto: "Duración de cada etapa" },
+        { tipo: "linea", color: "#4a326b", texto: "Tiempo acumulado" }
+    ];
+
+    if (hayEncuentro) {
+        // Arriba a la izquierda, por encima de la línea del límite
+        s += leyendaSVG(MARGEN.izq + 10, MARGEN.arr + 4, entradas);
+    } else {
+        s += leyendaSVG(MARGEN.izq + 10, MARGEN.arr + 8, entradas);
+        s += `<text x="${MARGEN.izq + 10}" y="${MARGEN.arr + 82}" font-size="12" font-weight="bold" fill="#b02a6b" stroke="white" stroke-width="3" paint-order="stroke">La suma crece sin parar:</text>`;
+        s += `<text x="${MARGEN.izq + 10}" y="${MARGEN.arr + 98}" font-size="12" font-weight="bold" fill="#b02a6b" stroke="white" stroke-width="3" paint-order="stroke">la serie no converge (r ≥ 1)</text>`;
+    }
+
+    grafSerie.innerHTML = s;
+}
+
+// Gráfica 4: distancia entre ambos en función del tiempo, D(t) = d − (vA − vT)·t.
+// Los puntos son la brecha que queda al terminar cada etapa: d · r^n.
+function dibujarGraficaBrecha() {
+    const vA = numero(controlAquiles);
+    const vT = numero(controlTortuga);
+    const ventaja = numero(controlVentaja);
+
+    const hayEncuentro = vA > vT;
+    const tEnc = hayEncuentro ? ventaja / (vA - vT) : Infinity;
+    const pendiente = vA - vT;
+    const brecha = t => ventaja - pendiente * t;
+
+    const tMax = hayEncuentro ? tEnc * 1.3 : 10;
+    const tFin = hayEncuentro ? tEnc : tMax;
+    const yMax = hayEncuentro ? ventaja * 1.1 : Math.max(ventaja, brecha(tMax)) * 1.1;
+
+    const px = t => MARGEN.izq + t / tMax * ANCHO_AREA;
+    const py = d => MARGEN.arr + ALTO_AREA - d / yMax * ALTO_AREA;
+    const baseY = MARGEN.arr + ALTO_AREA;
+
+    let s = ejesSVG(tMax, yMax, "Tiempo (s)", "Distancia entre ambos (m)");
+
+    // Recta de la brecha
+    s += `<line x1="${px(0)}" y1="${py(brecha(0))}" x2="${px(tFin)}" y2="${py(brecha(tFin))}" stroke="#4a326b" stroke-width="3" stroke-linecap="round"/>`;
+
+    // Línea vertical con el momento actual de la carrera
+    if (tiempo > 0) {
+        const tc = Math.min(tiempo, tFin);
+        s += `<line x1="${px(tc)}" y1="${MARGEN.arr}" x2="${px(tc)}" y2="${baseY}" stroke="#9b84b0" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+        s += `<circle cx="${px(tc)}" cy="${py(brecha(tc))}" r="5" fill="#4a326b" stroke="white" stroke-width="2"/>`;
+    }
+
+    if (hayEncuentro) {
+        const N = 8;
+        const { S, r } = calcularEtapas(vA, vT, ventaja, N);
+
+        // Brecha al final de cada etapa: d · r^n
+        for (let n = 1; n <= N; n++) {
+            const resto = ventaja * Math.pow(r, n);
+            s += `<circle cx="${px(S[n])}" cy="${py(resto)}" r="4" fill="${COLOR_PUNTO}" stroke="white" stroke-width="1.5"/>`;
+            if (n === 1) {
+                s += `<text x="${px(S[n]) + 9}" y="${py(resto) - 8}" font-size="10" font-weight="bold" fill="#b02a6b" stroke="white" stroke-width="3" paint-order="stroke">${formatear(resto)} m</text>`;
+            }
+        }
+
+        // Encuentro: la distancia llega a cero
+        s += `<circle cx="${px(tEnc)}" cy="${py(0)}" r="7" fill="${COLOR_PUNTO}" stroke="white" stroke-width="2.5"/>`;
+        s += `<text x="${px(tEnc) + 11}" y="${py(0) - 10}" font-size="12" font-weight="bold" fill="#b02a6b" stroke="white" stroke-width="3" paint-order="stroke">(${formatear(tEnc)} s, 0 m)</text>`;
+
+        // Derivada de la distancia (es constante)
+        s += `<text x="${MARGEN.izq + ANCHO_AREA - 8}" y="${MARGEN.arr + 80}" text-anchor="end" font-size="12" font-weight="bold" fill="#4a326b" stroke="white" stroke-width="3" paint-order="stroke">D′(t) = −${formatear(pendiente)} m/s</text>`;
+    } else {
+        s += `<text x="${MARGEN.izq + ANCHO_AREA - 8}" y="${baseY - 14}" text-anchor="end" font-size="12" font-weight="bold" fill="#b02a6b" stroke="white" stroke-width="3" paint-order="stroke">La distancia nunca llega a cero</text>`;
+    }
+
+    // Leyenda: a la derecha si la recta baja; a la izquierda si sube (para no taparla)
+    const xLeyenda = hayEncuentro ? MARGEN.izq + ANCHO_AREA - 178 : MARGEN.izq + 10;
+    s += leyendaSVG(xLeyenda, MARGEN.arr + 6, [
+        { tipo: "linea", color: "#4a326b", texto: "Distancia entre ambos" },
+        { tipo: "punto", color: COLOR_PUNTO, texto: "Al final de cada etapa" }
+    ]);
+
+    grafBrecha.innerHTML = s;
+}
+
+// Gráfica 5: velocidad vs. tiempo. El área bajo cada recta es la distancia recorrida
+// (integral de la velocidad). El área entre las dos rectas vale exactamente la ventaja.
+function dibujarGraficaVelocidadTiempo() {
+    const vA = numero(controlAquiles);
+    const vT = numero(controlTortuga);
+    const ventaja = numero(controlVentaja);
+
+    const hayEncuentro = vA > vT;
+    const tEnc = hayEncuentro ? ventaja / (vA - vT) : Infinity;
+
+    const tMax = hayEncuentro ? tEnc * 1.5 : 10;
+    const yMax = Math.max(vA, vT) * 1.3;
+
+    const px = t => MARGEN.izq + t / tMax * ANCHO_AREA;
+    const py = v => MARGEN.arr + ALTO_AREA - v / yMax * ALTO_AREA;
+    const baseY = MARGEN.arr + ALTO_AREA;
+
+    let s = ejesSVG(tMax, yMax, "Tiempo (s)", "Velocidad (m/s)");
+
+    if (hayEncuentro) {
+        const x0 = px(0), x1 = px(tEnc);
+
+        // Área bajo la recta de la tortuga: metros que ella avanza hasta el encuentro
+        s += `<rect x="${x0}" y="${py(vT)}" width="${x1 - x0}" height="${baseY - py(vT)}" fill="${COLOR_TORTUGA}" fill-opacity="0.25"/>`;
+
+        // Área entre las dos rectas: metros que Aquiles le recupera (= la ventaja)
+        s += `<rect x="${x0}" y="${py(vA)}" width="${x1 - x0}" height="${py(vT) - py(vA)}" fill="${COLOR_AQUILES}" fill-opacity="0.22"/>`;
+
+        s += `<text x="${(x0 + x1) / 2}" y="${py(vT / 2) + 4}" text-anchor="middle" font-size="11" font-weight="bold" fill="#276b3f">Tortuga: ${formatear(vT * tEnc)} m</text>`;
+        s += `<text x="${(x0 + x1) / 2}" y="${py((vA + vT) / 2) + 4}" text-anchor="middle" font-size="11" font-weight="bold" fill="#4a326b">Ventaja recuperada: ${formatear(ventaja)} m</text>`;
+        s += `<text x="${(x0 + x1) / 2}" y="${py(vA) - 8}" text-anchor="middle" font-size="11" font-weight="bold" fill="#4a326b">Aquiles recorre ${formatear(vA * tEnc)} m (área total)</text>`;
+
+        // Instante del encuentro
+        s += `<line x1="${x1}" y1="${py(vA)}" x2="${x1}" y2="${baseY}" stroke="${COLOR_PUNTO}" stroke-width="2" stroke-dasharray="5 4"/>`;
+        s += `<text x="${x1 + 8}" y="${baseY - 8}" font-size="12" font-weight="bold" fill="#b02a6b" stroke="white" stroke-width="3" paint-order="stroke">t* = ${formatear(tEnc)} s</text>`;
+    } else {
+        s += `<text x="${MARGEN.izq + ANCHO_AREA - 8}" y="${baseY - 14}" text-anchor="end" font-size="12" font-weight="bold" fill="#b02a6b" stroke="white" stroke-width="3" paint-order="stroke">Sin encuentro: el área no alcanza a ${formatear(ventaja)} m</text>`;
+    }
+
+    // Las dos velocidades (rectas horizontales)
+    s += `<line x1="${px(0)}" y1="${py(vA)}" x2="${px(tMax)}" y2="${py(vA)}" stroke="${COLOR_AQUILES}" stroke-width="3" stroke-linecap="round"/>`;
+    s += `<line x1="${px(0)}" y1="${py(vT)}" x2="${px(tMax)}" y2="${py(vT)}" stroke="${COLOR_TORTUGA}" stroke-width="3" stroke-linecap="round"/>`;
+
+    // Nombres directos sobre las rectas (en el tramo derecho)
+    s += `<text x="${MARGEN.izq + ANCHO_AREA - 6}" y="${py(vA) - 7}" text-anchor="end" font-size="11" font-weight="bold" fill="${COLOR_AQUILES}">Aquiles: ${formatear(vA)} m/s</text>`;
+    s += `<text x="${MARGEN.izq + ANCHO_AREA - 6}" y="${py(vT) - 7}" text-anchor="end" font-size="11" font-weight="bold" fill="${COLOR_TORTUGA}">Tortuga: ${formatear(vT)} m/s</text>`;
+
+    // Línea vertical con el momento actual de la carrera
+    if (tiempo > 0) {
+        const tc = Math.min(tiempo, tMax);
+        s += `<line x1="${px(tc)}" y1="${MARGEN.arr}" x2="${px(tc)}" y2="${baseY}" stroke="#9b84b0" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+    }
+
+    grafVelTiempo.innerHTML = s;
+}
+
+// Dibuja las seis gráficas
+function dibujarGraficas() {
+    dibujarGraficaPosicion();
+    dibujarGraficaEtapas();
+    dibujarGraficaSerie();
+    dibujarGraficaBrecha();
+    dibujarGraficaVelocidadTiempo();
+    dibujarGraficaVelocidades();
 }
 
 function fotograma(marcaTiempo) {
@@ -810,7 +1553,6 @@ function pausarCarrera() {
 function reiniciarCarrera() {
     pausarCarrera();
     tiempo = 0;
-    puntos = 0;
     desplazamiento = 0;
     encuentroMostrado = false;
     estadoCarrera.textContent = "Estado: lista para comenzar";
